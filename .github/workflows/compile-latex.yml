@@ -1,0 +1,65 @@
+name: Build LaTeX Report
+
+on:
+  # Trigger on push when LaTeX or related files change
+  push:
+    branches:
+      - main
+    paths:
+      - 'HW1_report.tex'
+      - '**/*.tex'
+      - '**/*.bib'
+      - 'assets/**'
+      - '2-Report_Template/**'
+  
+  # Allow manual trigger from Actions tab
+  workflow_dispatch:
+  
+  # Trigger on pull requests that modify LaTeX files
+  pull_request:
+    paths:
+      - 'HW1_report.tex'
+      - '**/*.tex'
+      - '**/*.bib'
+      - 'assets/**'
+      - '2-Report_Template/**'
+
+jobs:
+  build-latex:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: HW1_report.tex
+          args: -pdf -file-line-error -halt-on-error -interaction=nonstopmode
+      
+      - name: Check if PDF was generated
+        run: |
+          if [ -f "HW1_report.pdf" ]; then
+            echo "PDF generated successfully"
+            ls -lh HW1_report.pdf
+          else
+            echo "PDF generation failed"
+            exit 1
+          fi
+      
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: HW1_report
+          path: HW1_report.pdf
+          retention-days: 90
+      
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
+          keep_files: false
