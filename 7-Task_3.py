@@ -1,8 +1,8 @@
-import sys
 import os
-import numpy as np
+
 import matplotlib.pyplot as plt
-import time
+import numpy as np
+
 MAP_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '3-map/map.npy')
 
 
